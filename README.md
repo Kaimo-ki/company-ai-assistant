@@ -1,28 +1,59 @@
-# Company AI Assistant
+# Center Krasok AI
 
-AI Telegram bot that answers company questions using Groq API.
+## Описание
 
-## Technologies
-- Python
-- aiogram
-- Groq API
-- GitHub
+AI-помощник для клиентов Центра Красок.
 
-## Features
-- Answers user questions
-- Uses AI responses
-- Telegram integration
+Функции:
+- Консультация клиентов
+- Подбор товаров
+- Поиск аналогов
+- Проверка наличия товаров
+- Голосовые сообщения
+- Анализ фотографий помещений
+- Поиск ближайшей точки продаж
+- Показ актуальных акций
+- Рекомендации товаров по скидкам
 
-## Installation
+## Технологии
 
-```bash
-pip install -r requirements.txt
+Frontend:
+- React
 
-## Run
+Backend:
+- Node.js
+- Express
 
-```bash
-python bot.py
-```
-## Developer
+Database:
+- PostgreSQL
 
-Created by Moldir Kuat
+AI:
+- OpenAI
+- Gemini
+- Grok
+
+Дополнительно:
+- Azure Speech Services
+- Azure Vision
+- Apify
+
+## MVP
+
+1. Выбор языка (Русский / Қазақша)
+2. AI-консультант
+3. Поиск товаров
+4. Проверка наличия
+5. Предложение аналогов
+6. Ближайший магазин
+7. Просмотр акций
+8. Создание заявки
+9. Telegram-бот
+10. Сайт
+
+## Команда
+
+Frontend
+Backend
+Database
+AI
+Security
