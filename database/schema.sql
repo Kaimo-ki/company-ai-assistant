@@ -8,21 +8,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    price DECIMAL(10,2),
-    image_url TEXT,
-    in_stock BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100),
     price DECIMAL(10,2),
     image_url TEXT,
     description TEXT,
+    in_stock BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,21 +56,4 @@ CREATE TABLE IF NOT EXISTS promotions (
     end_date DATE,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    telegram_id BIGINT,
-    full_name VARCHAR(255),
-    phone VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    price DECIMAL(10,2),
-    image_url TEXT,
-    in_stock BOOLEAN DEFAULT true
 );
