@@ -6,13 +6,12 @@
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
           <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
         </svg>
-        <span>Paint AI</span>
+        <span>Центр Красок AI</span>
       </router-link>
-      
+
       <div class="nav-links">
-        <router-link to="/" class="nav-link" active-class="active">Catalog</router-link>
-        <router-link to="/chat" class="nav-link" active-class="active">AI Assistant</router-link>
-        <router-link to="/admin" class="nav-link" active-class="active">Admin</router-link>
+        <router-link to="/" class="nav-link" active-class="active">Каталог</router-link>
+        <router-link to="/chat" class="nav-link" active-class="active">ИИ-помощник</router-link>
       </div>
 
       <div class="nav-actions">
@@ -23,7 +22,10 @@
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
         </router-link>
-        <router-link to="/profile" class="btn btn-primary btn-sm" style="color: white; text-decoration: none;">Profile</router-link>
+
+        <router-link to="/profile" class="btn btn-primary btn-sm" style="color: white; text-decoration: none;">
+          Профиль
+        </router-link>
       </div>
     </div>
   </nav>
@@ -70,7 +72,8 @@
   transition: color var(--transition-fast);
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--text-color);
 }
 

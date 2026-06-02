@@ -1,44 +1,41 @@
 <template>
   <div class="profile-container container">
     <div class="profile-sidebar">
-      <h2>Profile</h2>
+      <h2>Профиль</h2>
       <ul class="nav-list">
-        <li class="active">Account Details</li>
-        <li>Order History</li>
-        <li>Settings</li>
-        <li class="danger">Sign Out</li>
+        <li class="active">Данные клиента</li>
+        <li>История заявок</li>
+        <li>Настройки</li>
       </ul>
     </div>
-    
+
     <div class="profile-content">
       <div class="content-section">
-        <h1>Account Details</h1>
+        <h1>Данные клиента</h1>
+        <p class="hint">
+          Укажите данные, чтобы менеджер Центра Красок мог связаться с вами по заявке.
+        </p>
+
         <form class="auth-form" @submit.prevent>
           <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" value="Maksim Developer" />
+            <label>Полное имя</label>
+            <input type="text" placeholder="Введите имя" />
           </div>
+
           <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" value="+7 (999) 000-00-00" />
+            <label>Номер телефона</label>
+            <input type="tel" placeholder="+7 ___ ___ __ __" />
           </div>
-          <button class="btn btn-primary mt-4">Save Changes</button>
+
+          <button class="btn btn-primary mt-4">Сохранить данные</button>
         </form>
       </div>
-      
+
       <div class="content-section mt-8">
-        <h2>Recent Orders</h2>
-        <div class="order-list">
-          <div class="order-card">
-            <div class="order-header">
-              <span class="order-id">Order #A1B2C3</span>
-              <span class="status completed">Completed</span>
-            </div>
-            <div class="order-body">
-              <p>2 items • 2,000 ₽</p>
-              <p class="date">May 15, 2026</p>
-            </div>
-          </div>
+        <h2>История заявок</h2>
+        <div class="empty-state">
+          <p>Пока заявок нет.</p>
+          <span>После оформления заявки она появится здесь.</span>
         </div>
       </div>
     </div>
@@ -91,15 +88,17 @@
   font-weight: 500;
 }
 
-.nav-list li.danger {
-  color: #ff3b30;
-  margin-top: 24px;
-}
-
 .profile-content h1 {
   font-size: 32px;
   font-weight: 600;
-  margin-bottom: 32px;
+  margin-bottom: 12px;
+}
+
+.hint {
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin-bottom: 28px;
+  line-height: 1.5;
 }
 
 .content-section h2 {
@@ -135,36 +134,24 @@
   font-size: 15px;
 }
 
-.mt-4 { margin-top: 16px; }
-.mt-8 { margin-top: 64px; }
+.mt-4 {
+  margin-top: 16px;
+}
 
-.order-card {
+.mt-8 {
+  margin-top: 64px;
+}
+
+.empty-state {
   background: var(--surface-color);
   border-radius: var(--radius-md);
   padding: 24px;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.order-id {
-  font-weight: 600;
-}
-
-.status {
-  font-size: 13px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(52, 199, 89, 0.1);
-  color: #34c759;
-}
-
-.order-body {
   color: var(--text-secondary);
-  font-size: 14px;
+}
+
+.empty-state p {
+  color: var(--text-color);
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 </style>
