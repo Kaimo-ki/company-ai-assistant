@@ -11,19 +11,21 @@
 
       <div class="nav-links">
         <router-link to="/" class="nav-link" active-class="active">Каталог</router-link>
+        <router-link to="/promotions" class="nav-link" active-class="active">Акции</router-link>
+        <router-link to="/delivery" class="nav-link" active-class="active">Доставка</router-link>
         <router-link to="/chat" class="nav-link" active-class="active">ИИ-помощник</router-link>
       </div>
 
       <div class="nav-actions">
-        <router-link to="/cart" class="icon-btn">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <router-link to="/cart" class="icon-btn" aria-label="Корзина">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="21" r="1"></circle>
             <circle cx="20" cy="21" r="1"></circle>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
         </router-link>
 
-        <router-link to="/profile" class="btn btn-primary btn-sm" style="color: white; text-decoration: none;">
+        <router-link to="/profile" class="btn btn-primary btn-sm profile-btn">
           Профиль
         </router-link>
       </div>
@@ -37,8 +39,8 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 60px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  height: 64px;
+  border-bottom: 1px solid var(--border-color);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -55,19 +57,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
 .nav-links {
   display: flex;
-  gap: 32px;
+  gap: 24px;
 }
 
 .nav-link {
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
 }
@@ -95,14 +98,33 @@
   transform: scale(1.1);
 }
 
+.profile-btn {
+  color: var(--bg-color);
+  text-decoration: none;
+}
+
 .btn-sm {
   padding: 8px 16px;
   font-size: 13px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .nav-links {
+    gap: 12px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 760px) {
   .nav-links {
     display: none;
+  }
+
+  .logo span {
+    font-size: 16px;
   }
 }
 </style>

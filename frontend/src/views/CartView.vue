@@ -1,69 +1,138 @@
 <template>
   <div class="cart-container container">
-    <h1 class="page-title">Your Bag</h1>
-    
+    <h1 class="page-title">Корзина</h1>
+
     <div v-if="cart.items.length === 0" class="empty-state">
-      <p>Your bag is empty.</p>
-      <router-link to="/" class="btn btn-outline mt-4">Continue Shopping</router-link>
+      <p>Корзина пустая.</p>
+      <router-link to="/" class="btn btn-outline mt-4">Вернуться в каталог</router-link>
     </div>
-    
+
     <div v-else class="cart-content">
       <div class="cart-items">
-        <div v-for="item in cart.items" :key="item.product.id" class="cart-item">
+        <article v-for="item in cart.items" :key="item.product.id" class="cart-item">
           <div class="item-color" :style="{ backgroundColor: item.product.hex_code }"></div>
+
           <div class="item-details">
             <h3>{{ item.product.name }}</h3>
-            <p>{{ item.product.price }} ₽</p>
+            <p>{{ item.product.brand }} • {{ item.product.volume }}</p>
+            <span>{{ formatPrice(item.product.price) }}</span>
           </div>
+
           <div class="item-actions">
-            <select :value="item.quantity" @change="e => cart.updateQuantity(item.product.id, parseInt(e.target.value))">
+            <select :value="item.quantity" @change="event => cart.updateQuantity(item.product.id, Number(event.target.value))">
               <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
             </select>
-            <button class="remove-btn" @click="cart.removeItem(item.product.id)">Remove</button>
+            <button class="remove-btn" @click="cart.removeItem(item.product.id)">Удалить</button>
           </div>
-        </div>
+        </article>
       </div>
-      
-      <div class="cart-summary">
-        <h2>Order Summary</h2>
+
+      <aside class="cart-summary">
+        <h2>Итог заявки</h2>
+
         <div class="summary-row">
-          <span>Subtotal</span>
-          <span>{{ cart.subtotal }} ₽</span>
+          <span>Товары</span>
+          <span>{{ cart.totalItems }}</span>
         </div>
+
+        <div class="summary-row">
+          <span>Сумма</span>
+          <span>{{ formatPrice(cart.subtotal) }}</span>
+        </div>
+
         <div class="summary-row promo-row">
-          <input type="text" placeholder="Promo code (e.g., START10)" v-model="promoCode" />
-          <button class="btn btn-outline btn-sm" @click="applyPromo">Apply</button>
+          <input type="text" placeholder="Промокод: START10 или SALE20" v-model.trim="promoCode" />
+          <button class="btn btn-outline btn-sm" @click="applyPromo">OK</button>
         </div>
+
         <div v-if="cart.discountPercent > 0" class="summary-row discount">
-          <span>Discount ({{ cart.discountPercent }}%)</span>
-          <span>-{{ (cart.subtotal * cart.discountPercent / 100).toFixed(2) }} ₽</span>
+          <span>Скидка {{ cart.discountPercent }}%</span>
+          <span>-{{ formatPrice(cart.subtotal * cart.discountPercent / 100) }}</span>
         </div>
+
         <div class="summary-row total">
-          <span>Total</span>
-          <span>{{ cart.total.toFixed(2) }} ₽</span>
+          <span>К оплате</span>
+          <span>{{ formatPrice(cart.total) }}</span>
         </div>
-        <button class="btn btn-primary btn-full checkout-btn">Check Out</button>
-      </div>
+
+        <button class="btn btn-primary btn-full checkout-btn" @click="createOrderRequest">
+          Оформить заявку
+        </button>
+
+        <p class="small-note">
+          Для демо заявка сохранится в истории личного кабинета.
+        </p>
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useCartStore } from '../stores/cart';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '../stores/cart'
 
-const cart = useCartStore();
-const promoCode = ref('');
+const cart = useCartStore()
+const router = useRouter()
+const promoCode = ref('')
 
-const applyPromo = () => {
-  if (promoCode.value === 'START10') {
-    cart.applyDiscount(10);
-  } else if (promoCode.value === 'SALE20') {
-    cart.applyDiscount(20);
+function formatPrice(value) {
+  return new Intl.NumberFormat('ru-KZ', {
+    style: 'currency',
+    currency: 'KZT',
+    maximumFractionDigits: 0
+  }).format(Number(value || 0))
+}
+
+function applyPromo() {
+  const code = promoCode.value.toUpperCase()
+
+  if (code === 'START10') {
+    cart.applyDiscount(10)
+  } else if (code === 'SALE20') {
+    cart.applyDiscount(20)
   } else {
-    alert("Invalid promo code");
+    window.alert('Промокод не найден. Для демо используйте START10 или SALE20.')
   }
-};
+}
+
+function createOrderRequest() {
+  let profile = {}
+
+  try {
+    profile = JSON.parse(window.localStorage.getItem('paintCustomerProfile') || '{}')
+  } catch {
+    profile = {}
+  }
+
+  if (!profile.name || !profile.phone) {
+    window.alert('Сначала сохраните имя и телефон в личном кабинете.')
+    router.push('/profile')
+    return
+  }
+
+  const request = {
+    id: Date.now(),
+    type: 'Заявка из корзины',
+    status: 'Новая',
+    name: profile.name,
+    phone: profile.phone,
+    date: new Date().toLocaleString('ru-RU'),
+    total: cart.total,
+    items: cart.items.map(item => ({
+      id: item.product.id,
+      name: item.product.name,
+      quantity: item.quantity
+    })),
+    comment: 'Клиент оформил заявку из корзины на сайте.'
+  }
+
+  const saved = JSON.parse(window.localStorage.getItem('paintRequests') || '[]')
+  window.localStorage.setItem('paintRequests', JSON.stringify([request, ...saved]))
+
+  cart.clearCart()
+  router.push('/profile')
+}
 </script>
 
 <style scoped>
@@ -72,10 +141,11 @@ const applyPromo = () => {
 }
 
 .page-title {
-  font-size: 40px;
-  font-weight: 600;
+  font-size: 42px;
+  font-weight: 700;
   margin-bottom: 48px;
   text-align: center;
+  letter-spacing: -0.8px;
 }
 
 .empty-state {
@@ -84,7 +154,9 @@ const applyPromo = () => {
   padding: 60px 0;
 }
 
-.mt-4 { margin-top: 16px; }
+.mt-4 {
+  margin-top: 16px;
+}
 
 .cart-content {
   display: grid;
@@ -93,17 +165,11 @@ const applyPromo = () => {
   align-items: start;
 }
 
-@media (max-width: 900px) {
-  .cart-content {
-    grid-template-columns: 1fr;
-  }
-}
-
 .cart-item {
   display: flex;
-  padding: 32px 0;
+  padding: 28px 0;
   border-bottom: 1px solid var(--border-color);
-  gap: 24px;
+  gap: 22px;
 }
 
 .cart-item:first-child {
@@ -111,9 +177,10 @@ const applyPromo = () => {
 }
 
 .item-color {
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
 }
 
 .item-details {
@@ -122,15 +189,24 @@ const applyPromo = () => {
 
 .item-details h3 {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 650;
   margin-bottom: 8px;
+}
+
+.item-details p {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.item-details span {
+  font-weight: 700;
 }
 
 .item-actions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 16px;
+  gap: 14px;
 }
 
 .item-actions select {
@@ -148,13 +224,14 @@ const applyPromo = () => {
 
 .cart-summary {
   background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
   padding: 32px;
   border-radius: var(--radius-md);
 }
 
 .cart-summary h2 {
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 650;
   margin-bottom: 24px;
 }
 
@@ -162,16 +239,18 @@ const applyPromo = () => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 12px;
   font-size: 15px;
 }
 
 .promo-row {
-  gap: 8px;
+  align-items: center;
 }
 
 .promo-row input {
   flex-grow: 1;
-  padding: 8px 12px;
+  min-width: 0;
+  padding: 9px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: var(--bg-color);
@@ -179,12 +258,12 @@ const applyPromo = () => {
 }
 
 .discount {
-  color: #34c759;
+  color: #22a06b;
 }
 
 .total {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid var(--border-color);
@@ -192,8 +271,31 @@ const applyPromo = () => {
 
 .checkout-btn {
   width: 100%;
-  margin-top: 32px;
+  margin-top: 28px;
   padding: 16px;
   font-size: 16px;
+}
+
+.small-note {
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .cart-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .cart-item {
+    flex-direction: column;
+  }
+
+  .item-actions {
+    align-items: flex-start;
+  }
 }
 </style>
