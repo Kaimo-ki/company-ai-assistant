@@ -1,5 +1,6 @@
 <script setup>
 import Navbar from './components/Navbar.vue'
+import Footer from './components/Footer.vue'
 </script>
 
 <template>
@@ -7,11 +8,12 @@ import Navbar from './components/Navbar.vue'
   <main>
     <router-view />
   </main>
+  <Footer />
 </template>
 
 <style scoped>
 main {
   min-height: 100vh;
-  padding-top: 60px; /* Offset for fixed navbar */
+  padding-top: 64px;
 }
 </style>
