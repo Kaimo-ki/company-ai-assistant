@@ -1,49 +1,84 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const { sequelize } = require("./models");
+// «Центр красок» backend — Cloudflare Worker on Hono + D1.
+// Provides designer auth (register/login/logout/me) and order listing.
 
-dotenv.config();
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { hashPassword, newSalt, safeEqual, createSession, requireAuth } from "./auth.js";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const app = new Hono();
 
-app.use(cors());
-app.use(express.json());
+app.use("*", cors());
 
-const productRoutes = require("./routes/productRoutes");
-const storeRoutes = require("./routes/storeRoutes");
-const chatRoutes = require("./routes/chatRoutes");
+app.get("/", (c) => c.text("CENTER KRASOK AI BACKEND (Cloudflare Worker + D1)"));
 
-app.use("/api/products", productRoutes);
-app.use("/api/stores", storeRoutes);
-app.use("/api/chat", chatRoutes);
+// --- Auth ---
 
-app.get("/", (req, res) => {
-  res.send("CENTER KRASOK AI BACKEND WORKS (SQLite)");
-});
-
-app.get("/db-test", async (req, res) => {
-  try {
-    await sequelize.authenticate();
-    res.json({
-      status: "database connected",
-      dialect: sequelize.getDialect()
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "database error",
-      error: error.message
-    });
+app.post("/api/auth/register", async (c) => {
+  const { name, email, password } = await c.req.json().catch(() => ({}));
+  if (!name || !email || !password) {
+    return c.json({ error: "Укажите имя, email и пароль" }, 400);
   }
+
+  const existing = await c.env.DB
+    .prepare("SELECT id FROM designers WHERE email = ?")
+    .bind(email.toLowerCase())
+    .first();
+  if (existing) return c.json({ error: "Дизайнер с таким email уже существует" }, 409);
+
+  const id = crypto.randomUUID();
+  const salt = newSalt();
+  const passwordHash = await hashPassword(password, salt);
+
+  await c.env.DB
+    .prepare("INSERT INTO designers (id, name, email, password_hash, salt) VALUES (?, ?, ?, ?, ?)")
+    .bind(id, name, email.toLowerCase(), passwordHash, salt)
+    .run();
+
+  const token = await createSession(c.env.DB, id);
+  return c.json({ token, designer: { id, name, email: email.toLowerCase() } }, 201);
 });
 
-// Sync models and start server
-sequelize.sync({ alter: true }).then(() => {
-  console.log("Database synchronized");
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server started on port ${PORT}`);
+app.post("/api/auth/login", async (c) => {
+  const { email, password } = await c.req.json().catch(() => ({}));
+  if (!email || !password) return c.json({ error: "Укажите email и пароль" }, 400);
+
+  const designer = await c.env.DB
+    .prepare("SELECT id, name, email, password_hash, salt FROM designers WHERE email = ?")
+    .bind(email.toLowerCase())
+    .first();
+  if (!designer) return c.json({ error: "Неверный email или пароль" }, 401);
+
+  const candidate = await hashPassword(password, designer.salt);
+  if (!safeEqual(candidate, designer.password_hash)) {
+    return c.json({ error: "Неверный email или пароль" }, 401);
+  }
+
+  const token = await createSession(c.env.DB, designer.id);
+  return c.json({
+    token,
+    designer: { id: designer.id, name: designer.name, email: designer.email },
   });
-}).catch(err => {
-  console.error("Failed to sync database:", err);
 });
+
+app.post("/api/auth/logout", requireAuth(), async (c) => {
+  await c.env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(c.get("token")).run();
+  return c.json({ ok: true });
+});
+
+app.get("/api/auth/me", requireAuth(), (c) => c.json({ designer: c.get("designer") }));
+
+// --- Orders ---
+
+app.get("/api/orders", requireAuth(), async (c) => {
+  const designer = c.get("designer");
+  const { results } = await c.env.DB
+    .prepare(
+      `SELECT id, client_name, client_phone, room_type, area, budget, comment, status, created_at
+       FROM orders WHERE designer_id = ? ORDER BY created_at DESC`
+    )
+    .bind(designer.id)
+    .all();
+  return c.json({ orders: results || [] });
+});
+
+export default app;

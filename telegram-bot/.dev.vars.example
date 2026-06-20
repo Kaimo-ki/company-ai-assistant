@@ -1,0 +1,8 @@
+# Образец секретов для локальной разработки бота (wrangler dev читает .dev.vars).
+# Скопируй этот файл в `.dev.vars` и вставь реальный токен от @BotFather.
+# Файл .dev.vars в git НЕ попадает (он в .gitignore).
+#
+# Для ПРОДА токен задаётся не файлом, а командой:
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+
+TELEGRAM_BOT_TOKEN=123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

@@ -4,8 +4,10 @@ import ChatView from '../views/ChatView.vue'
 import CartView from '../views/CartView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import AdminView from '../views/AdminView.vue'
+import LoginView from '../views/LoginView.vue'
 import PromotionsView from '../views/PromotionsView.vue'
 import DeliveryView from '../views/DeliveryView.vue'
+import { useAuthStore } from '../stores/auth.js'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,11 +43,27 @@ const router = createRouter({
       component: ProfileView
     },
     {
+      path: '/login',
+      name: 'login',
+      component: LoginView
+    },
+    {
       path: '/admin',
       name: 'admin',
-      component: AdminView
+      component: AdminView,
+      meta: { requiresAuth: true }
     }
   ]
+})
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { name: 'login' }
+  }
+  if (to.name === 'login' && auth.isAuthenticated) {
+    return { name: 'admin' }
+  }
 })
 
 export default router
