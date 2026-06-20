@@ -2,16 +2,17 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node src/index.js"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 execute company-ai-assistant-db --local --file=../database/d1-schema.sql",
+    "db:remote": "wrangler d1 execute company-ai-assistant-db --remote --file=../database/d1-schema.sql"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "sequelize": "^6.37.8",
-    "sqlite3": "^6.0.1"
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
   }
 }

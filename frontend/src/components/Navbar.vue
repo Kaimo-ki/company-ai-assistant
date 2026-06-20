@@ -25,6 +25,14 @@
           </svg>
         </router-link>
 
+        <router-link
+          :to="auth.isAuthenticated ? '/admin' : '/login'"
+          class="nav-link cabinet-link"
+          active-class="active"
+        >
+          {{ auth.isAuthenticated ? 'Кабинет' : 'Для дизайнеров' }}
+        </router-link>
+
         <router-link to="/profile" class="btn btn-primary btn-sm profile-btn">
           Профиль
         </router-link>
@@ -32,6 +40,12 @@
     </div>
   </nav>
 </template>
+
+<script setup>
+import { useAuthStore } from '../stores/auth.js'
+
+const auth = useAuthStore()
+</script>
 
 <style scoped>
 .navbar {
@@ -84,6 +98,10 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.cabinet-link {
+  white-space: nowrap;
 }
 
 .icon-btn {

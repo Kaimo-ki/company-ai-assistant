@@ -1,0 +1,9 @@
+name = "company-ai-assistant"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "company-ai-assistant-db"
+database_id = "ddc3c8a6-665b-425c-9230-fa90799a1ffc"
