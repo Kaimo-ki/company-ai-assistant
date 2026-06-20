@@ -31,36 +31,34 @@
 
         <p v-if="loading" class="hint">Загрузка...</p>
         <p v-else-if="error" class="error">{{ error }}</p>
-        <p v-else-if="orders.length === 0" class="hint">
-          Пока нет заявок. Поделитесь QR-кодом с клиентами 🎨
-        </p>
+        <div v-else-if="orders.length === 0" class="empty-state">
+          <p>Пока заявок нет.</p>
+          <span>Поделитесь QR-кодом с клиентами — заявки из бота появятся здесь 🎨</span>
+        </div>
 
-        <table v-else class="data-table">
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Клиент</th>
-              <th>Телефон</th>
-              <th>Помещение</th>
-              <th>Площадь</th>
-              <th>Бюджет</th>
-              <th>Пожелания</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="order in orders" :key="order.id">
-              <td>{{ formatDate(order.created_at) }}</td>
-              <td>{{ order.client_name || "—" }}</td>
-              <td>{{ order.client_phone || "—" }}</td>
-              <td>{{ order.room_type || "—" }}</td>
-              <td>{{ order.area || "—" }}</td>
-              <td>{{ order.budget || "—" }}</td>
-              <td class="comment-cell">{{ order.comment || "—" }}</td>
-              <td><span class="status new">{{ order.status }}</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-else class="requests-list">
+          <article v-for="order in orders" :key="order.id" class="request-card">
+            <div class="request-top">
+              <div>
+                <span class="request-type">Заявка из бота</span>
+                <h3>{{ order.client_name || "Без имени" }}</h3>
+              </div>
+              <span class="status">{{ statusLabel(order.status) }}</span>
+            </div>
+
+            <div class="request-grid">
+              <p><b>Телефон:</b> {{ order.client_phone || "—" }}</p>
+              <p><b>Дата:</b> {{ formatDate(order.created_at) }}</p>
+              <p><b>Помещение:</b> {{ order.room_type || "—" }}</p>
+              <p><b>Площадь:</b> {{ order.area ? order.area + " м²" : "—" }}</p>
+              <p><b>Бюджет:</b> {{ order.budget || "—" }}</p>
+            </div>
+
+            <div v-if="order.comment" class="request-comment">
+              <b>Пожелания:</b> {{ order.comment }}
+            </div>
+          </article>
+        </div>
       </div>
     </div>
   </div>
@@ -90,6 +88,11 @@ function formatDate(value) {
   if (!value) return "—";
   const d = new Date(value.replace(" ", "T") + "Z");
   return isNaN(d) ? value : d.toLocaleString("ru-RU");
+}
+
+function statusLabel(status) {
+  const map = { new: "Новая", in_progress: "В работе", done: "Завершена" };
+  return map[status] || status;
 }
 
 async function copyLink() {
@@ -214,43 +217,79 @@ onMounted(async () => {
   font-size: 14px;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.data-table th {
-  padding: 12px 14px;
+.empty-state {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
   color: var(--text-secondary);
-  font-weight: 500;
+}
+
+.empty-state p {
+  color: var(--text-color);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.requests-list {
+  display: grid;
+  gap: 16px;
+}
+
+.request-card {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 22px;
+}
+
+.request-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.request-type {
+  color: var(--text-secondary);
   font-size: 13px;
-  border-bottom: 1px solid var(--border-color);
 }
 
-.data-table td {
-  padding: 14px;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
-}
-
-.comment-cell {
-  max-width: 220px;
+.request-card h3 {
+  font-size: 20px;
+  margin-top: 4px;
 }
 
 .status {
-  padding: 4px 10px;
+  background: var(--text-color);
+  color: var(--bg-color);
   border-radius: 999px;
-  font-size: 13px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.status.new {
-  background: rgba(0, 122, 255, 0.12);
-  color: #007aff;
+.request-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 20px;
+  color: var(--text-secondary);
+}
+
+.request-comment {
+  margin-top: 16px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {
   .panels {
+    grid-template-columns: 1fr;
+  }
+
+  .request-grid {
     grid-template-columns: 1fr;
   }
 }
